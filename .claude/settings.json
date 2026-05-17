@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Bash(python3:*)",
+      "Bash(pip3:*)",
+      "Bash(pip:*)",
+      "Read",
+      "Write",
+      "Edit",
+      "mcp__yfinance__*",
+      "mcp__edgartools__*"
+    ]
+  }
+}

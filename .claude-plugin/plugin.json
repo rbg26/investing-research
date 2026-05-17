@@ -1,0 +1,8 @@
+{
+  "name": "investing-research",
+  "version": "1.0.0",
+  "description": "Custom investing research toolkit: industry analysis, financial statement analysis, full valuation model, and investment checklist — end-to-end deep-dive workflow for any publicly traded ticker.",
+  "author": {
+    "name": "rbg26"
+  }
+}

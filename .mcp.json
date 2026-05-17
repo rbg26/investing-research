@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "edgartools": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your@email.com"
+      }
+    },
+    "yfinance": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["yfmcp@latest"]
+    }
+  }
+}

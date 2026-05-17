@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Excel outputs (generated at runtime, not part of the plugin)
+*.xlsx
+
+# Compiled skill artifacts
+*.skill
+
+# Local Claude settings overrides
+.claude/settings.local.json
