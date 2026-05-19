@@ -11,7 +11,7 @@
     "yfinance": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["yfmcp@latest"]
+      "args": ["yfmcp==0.11.3"]
     }
   }
 }
