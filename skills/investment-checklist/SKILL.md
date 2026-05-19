@@ -95,6 +95,79 @@ Pass this dossier into the API call alongside the financial and strategy finding
 
 ---
 
+## Step 1c: FCF Growth Rate Research (Always Run Before the Checklist)
+
+This step feeds Section 5 (Market-Implied Growth Rate). Pull the data below from sources already gathered in prior stages — do not re-fetch what the valuation model already collected.
+
+### 1. Historical FCF — from EDGAR / yfinance financials already pulled
+
+Compute FCF = Operating Cash Flow − CapEx for each available year (target: 5 years, minimum 3).
+
+Calculate:
+- **3-year FCF CAGR**: `(FCF_most_recent / FCF_3_years_ago)^(1/3) − 1`
+- **5-year FCF CAGR** (if available): `(FCF_most_recent / FCF_5_years_ago)^(1/5) − 1`
+- **Most recent YoY FCF growth**: `FCF_year_n / FCF_year_n-1 − 1`
+- **FCF margin trend**: FCF / Revenue for each year — is margin expanding, stable, or compressing?
+
+Flag any years where FCF was materially distorted by one-time working capital swings, asset sales, or restructuring. Note the distortion and use a normalized figure where appropriate.
+
+### 2. Peer FCF Growth Rates — from comps data already pulled for the valuation model
+
+For each comparable company in the comps tab, compute:
+- 3-year FCF CAGR using the same formula
+- Most recent FCF margin
+
+Derive an **industry median FCF CAGR** from the peer set. Note the range (highest / lowest peer) alongside the median.
+
+### 3. Market-Implied and Reverse Dhandho Embedded Growth Rates
+
+If the valuation model (full-valuation-model skill) has been run, extract directly:
+- **Reverse Dhandho embedded growth rate** — the FCF growth rate implied by the current share price under the Dhandho DCF framework
+
+If the valuation model has not been run, compute the market-implied FCF growth rate manually using a simple reverse DCF:
+
+```
+Solve for g such that:
+  Current Market Cap = FCF_base × Σ(t=1 to 10) [(1+g)^t / (1+Ke)^t]
+                     + [FCF_base × (1+g)^10 × Exit_Multiple] / (1+Ke)^10
+                     + Net_Cash
+
+where Ke = cost of equity (use 11–12% if not already established)
+      Exit_Multiple = industry median EV/FCF or P/FCF from comps
+      Net_Cash = cash − financial debt
+```
+
+### Compile into a "FCF Growth Dossier"
+
+```
+FCF GROWTH DOSSIER — [TICKER]
+
+Historical FCF (last 5 years):
+  FY[n-4]: $Xm  |  FY[n-3]: $Xm  |  FY[n-2]: $Xm  |  FY[n-1]: $Xm  |  FY[n]: $Xm
+  3-year CAGR: X%  |  5-year CAGR: X%  |  Most recent YoY: X%
+  FCF margin trend: X% → X% → X% → X% → X%
+  Notes on distortions: [any one-time items that inflate or deflate any year]
+
+Industry peer FCF CAGRs (3-year):
+  [Peer 1]: X%  |  [Peer 2]: X%  |  [Peer 3]: X%  |  [Peer 4]: X%  |  [Peer 5]: X%
+  Industry median: X%  |  Range: X% to X%
+
+Market-implied / Embedded growth rates:
+  Current share price: $X
+  Reverse Dhandho embedded FCF growth rate: X%
+  [or: Market-implied FCF growth rate (reverse DCF): X%]
+
+Achievability assessment (preliminary — for analyst to refine):
+  Embedded rate vs. company's own 3-yr CAGR: [above / in line / below]
+  Embedded rate vs. industry median: [above / in line / below]
+  Key risks to achieving embedded rate: [list 2–3 specific factors]
+  Key supports for achieving embedded rate: [list 1–2 specific factors]
+```
+
+Pass this dossier into the API call alongside the financial, strategy, and management findings.
+
+---
+
 ## Step 2: Run the Checklist via Claude API with Extended Thinking
 
 Make a single call to `claude-opus-4-6` with **extended thinking enabled** (`thinking: { type: "enabled", budget_tokens: 8000 }`).
@@ -118,7 +191,8 @@ Rules:
    (b) One concise evidence statement of no more than 20 words citing the specific data point, ratio, or quote that determined the verdict
    (c) For any verdict of Caution, Red Flag, Fail, or Concern ONLY: an expanded explanation of 3–4 sentences (maximum) that unpacks the specific risk or concern with supporting data. This is in addition to, not instead of, the concise evidence line. Clear / Positive / Neutral / Insufficient Information verdicts do NOT receive expanded text.
 5. For Section 4 (What Would Munger Ask?), produce the three sub-sections in flowing prose — not verdicts or badges. Ground every concern and question in the specific evidence from the research provided. Write as Munger would reason: inverted, skeptical, focused on permanent capital loss and business quality over the long run.
-6. Use extended thinking to carefully weigh the evidence before answering.
+6. For Section 5 (Market-Implied Growth Rate), produce the analysis in structured prose with supporting data — not verdict badges. Use the FCF Growth Dossier as the primary input. Assess achievability honestly: if the embedded rate exceeds both the company's recent trend and the industry median, say so directly. If it appears conservative, say that too. End with a single verdict label: **Demanding** (embedded rate materially above historical and peer benchmarks), **Fair** (embedded rate in line with achievable base case), or **Conservative** (embedded rate below what the business has demonstrated).
+7. Use extended thinking to carefully weigh the evidence before answering.
 ```
 
 ---
@@ -198,6 +272,30 @@ A single paragraph direct synthesis: would Munger put this in the "too hard" pil
 
 ---
 
+### Section 5: Market-Implied Growth Rate
+
+Using the FCF Growth Dossier compiled in Step 1c, produce a structured analytical assessment of what FCF growth the current share price implies and whether that growth is achievable.
+
+This section is written in flowing analytical prose — no verdict badge rows, no bullet points. It has four parts:
+
+#### 1. What the Market Is Pricing In
+State the reverse Dhandho embedded growth rate (or market-implied FCF growth rate) clearly. Explain what it means in plain terms: if the market is pricing in 5% FCF growth, what does that require the business to do in absolute terms over 10 years? Anchor it to current FCF and a year-10 FCF figure so the reader can visualise the implied trajectory, not just a percentage.
+
+#### 2. What the Business Has Actually Done
+Present the historical FCF record — 3-year and 5-year CAGRs, most recent YoY growth, and FCF margin trend. Be direct about whether the trend is accelerating, stable, or decelerating. Flag any years distorted by one-time items and explain what the normalized picture looks like. The goal is an honest read of the company's demonstrated FCF generation capacity, not the best or worst year in isolation.
+
+#### 3. How the Business Compares to Its Industry
+Present the industry peer FCF CAGRs and the median. Situate the company's historical growth rate relative to peers — is it a consistent outperformer, roughly in line, or a laggard? Then ask: is the embedded growth rate above or below what the industry as a whole has demonstrated? A company priced for above-industry growth must have a structural reason (moat, pricing power, distribution expansion) — if that reason is not visible in the strategy analysis, that is the central risk.
+
+#### 4. Achievability Verdict
+A single honest paragraph assessing whether the embedded growth rate is achievable. Draw on all three prior parts: the implied trajectory, the company's track record, and the peer benchmark. Name the specific conditions that would need to hold for the embedded rate to be met — and the specific conditions under which it would not be. End with the verdict label on its own line:
+
+**Verdict: Demanding** — embedded rate materially above historical trend and industry median; requires sustained outperformance with no margin for error  
+**Verdict: Fair** — embedded rate consistent with the company's demonstrated trajectory and roughly in line with peer benchmarks; achievable in a base case  
+**Verdict: Conservative** — embedded rate below what the business has historically delivered and below industry peers; the market is pricing in deceleration beyond what the evidence supports
+
+---
+
 ## Step 4: Output as PDF
 
 Read the PDF skill before producing output: `/mnt/skills/public/pdf/SKILL.md`
@@ -247,6 +345,24 @@ Set `VALIGN` to `'TOP'` (not `'MIDDLE'`) in the `TableStyle` so expanded cells a
 - A 3–5 sentence analyst synthesis paragraph: what the checklist collectively reveals about this company — its financial mechanics, structural risks, and management quality. Write it as a genuine analytical conclusion.
 - Do NOT produce a binary Go/No-Go verdict — the checklist is an input to judgment, not a replacement for it.
 
+**Market-Implied Growth Rate block** (after `PageBreak()`):
+- Section header: `Helvetica-Bold` 12pt — "Market-Implied Growth Rate"
+- Thin `HRFlowable` rule below the header
+- **Key figures table** (rendered before the prose): a compact two-column `Table` with no outer border, showing:
+  - Embedded FCF growth rate (reverse Dhandho or reverse DCF)
+  - Company 3-year FCF CAGR
+  - Company 5-year FCF CAGR (if available)
+  - Most recent YoY FCF growth
+  - Industry median FCF CAGR (peer set)
+  - Current FCF ($M) and implied year-10 FCF ($M) at the embedded rate
+  - Left column: label in `Helvetica-Bold` 8.5pt; right column: value in `Helvetica` 8.5pt
+- Sub-section headers (`Helvetica-Bold` 10.5pt): "What the Market Is Pricing In", "What the Business Has Actually Done", "How the Business Compares to Its Industry", "Achievability Verdict"
+- Body text: `Helvetica` 9.5pt, `leading=14`, justified — flowing prose
+- **Verdict line**: render the final verdict label (`Demanding` / `Fair` / `Conservative`) as a standalone colored badge using the same color scheme as checklist verdicts:
+  - Demanding → `#C0392B` text on `#FADBD8` background
+  - Fair → `#1E8449` text on `#D5F5E3` background
+  - Conservative → `#D68910` text on `#FCF3CF` background
+
 **What Would Munger Ask? block** (last page, after `PageBreak()`):
 - Section header: `Helvetica-Bold` 12pt — "What Would Munger Ask?"
 - Thin `HRFlowable` rule below the header
@@ -255,7 +371,7 @@ Set `VALIGN` to `'TOP'` (not `'MIDDLE'`) in the `TableStyle` so expanded cells a
 - Render each sub-section as one or more `Paragraph` flowables with `spaceBefore=8` between paragraphs
 
 ### Page order
-Title block → Section 1: Warnings → Section 2: Avoid Checklist → Section 3: Management Quality → Summary → What Would Munger Ask?
+Title block → Section 1: Warnings → Section 2: Avoid Checklist → Section 3: Management Quality → Summary → Market-Implied Growth Rate → What Would Munger Ask?
 
 Use `PageBreak()` between sections.
 
